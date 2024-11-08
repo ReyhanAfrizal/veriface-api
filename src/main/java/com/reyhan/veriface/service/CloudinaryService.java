@@ -10,11 +10,11 @@ Created on 11/6/2024 4:26 PM
 @Last Modified 11/6/2024 4:26 PM
 Version 1.0
 */
-
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,12 +22,21 @@ import java.util.Map;
 @Service
 public class CloudinaryService {
 
-    @Autowired
-    private Cloudinary cloudinary;
+    private final Cloudinary cloudinary;
 
-    public String uploadImage(byte[] imageBytes) throws IOException {
-        Map<String, String> uploadResult = cloudinary.uploader().upload(imageBytes, ObjectUtils.emptyMap());
-        return uploadResult.get("url");  // URL of the uploaded image
+    public CloudinaryService(
+            @Value("${cloudinary.cloud_name}") String cloudName,
+            @Value("${cloudinary.api_key}") String apiKey,
+            @Value("${cloudinary.api_secret}") String apiSecret) {
+        this.cloudinary = new Cloudinary(ObjectUtils.asMap(
+                "cloud_name", cloudName,
+                "api_key", apiKey,
+                "api_secret", apiSecret
+        ));
+    }
+
+    public String uploadFile(MultipartFile file) throws IOException {
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        return (String) uploadResult.get("url");
     }
 }
-

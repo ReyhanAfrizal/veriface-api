@@ -1,6 +1,5 @@
 package com.reyhan.veriface.service;
 
-
 /*
 IntelliJ IDEA 2024.2.3 (Community Edition)
 Build #IC-242.23339.11, built on September 25, 2024
@@ -10,6 +9,7 @@ Created on 11/5/2024 4:18 PM
 @Last Modified 11/5/2024 4:18 PM
 Version 1.0
 */
+
 import com.reyhan.veriface.dto.DataDTO;
 import com.reyhan.veriface.model.Data;
 import com.reyhan.veriface.repo.DataRepository;
@@ -17,11 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,23 +27,25 @@ public class DataService {
     @Autowired
     private DataRepository dataRepository;
 
-    private final String uploadDir = "uploads/"; // Set your upload directory
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
-    // Create a new data entry with file uploads
+    // Create a new data entry with file uploads to Cloudinary
     public Data createData(DataDTO dataDTO, MultipartFile fotoKtp, MultipartFile fotoSelfie) throws IOException {
         Data data = new Data();
         data.setMid(dataDTO.getMid());
         data.setNotes(dataDTO.getNotes());
         data.setResult(dataDTO.getResult());
 
-        // Save uploaded files and set their paths in the Data object
-        String fotoKtpPath = saveFile(fotoKtp);
-        String fotoSelfiePath = saveFile(fotoSelfie);
+        // Upload files to Cloudinary and get URLs
+        String fotoKtpUrl = cloudinaryService.uploadFile(fotoKtp);
+        String fotoSelfieUrl = cloudinaryService.uploadFile(fotoSelfie);
 
-        data.setFotoKtp(fotoKtpPath);
-        data.setFotoSelfie(fotoSelfiePath);
+        // Set the URLs in the Data entity
+        data.setFotoKtp(fotoKtpUrl);
+        data.setFotoSelfie(fotoSelfieUrl);
 
-        // User is set automatically in the model
+        // Save and return the data entity
         return dataRepository.save(data);
     }
 
@@ -68,25 +66,23 @@ public class DataService {
             data.setNotes(dataDTO.getNotes());
             data.setResult(dataDTO.getResult());
 
-            // Save uploaded files if provided
+            // Upload new files to Cloudinary if provided, and update URLs
             if (fotoKtp != null && !fotoKtp.isEmpty()) {
-                String fotoKtpPath = null;
                 try {
-                    fotoKtpPath = saveFile(fotoKtp);
+                    String fotoKtpUrl = cloudinaryService.uploadFile(fotoKtp);
+                    data.setFotoKtp(fotoKtpUrl);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Failed to upload fotoKtp", e);
                 }
-                data.setFotoKtp(fotoKtpPath);
             }
 
             if (fotoSelfie != null && !fotoSelfie.isEmpty()) {
-                String fotoSelfiePath = null;
                 try {
-                    fotoSelfiePath = saveFile(fotoSelfie);
+                    String fotoSelfieUrl = cloudinaryService.uploadFile(fotoSelfie);
+                    data.setFotoSelfie(fotoSelfieUrl);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Failed to upload fotoSelfie", e);
                 }
-                data.setFotoSelfie(fotoSelfiePath);
             }
 
             return dataRepository.save(data);
@@ -101,23 +97,5 @@ public class DataService {
         } else {
             return false;
         }
-    }
-
-    // File saving logic
-    private String saveFile(MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new IOException("Failed to store empty file.");
-        }
-
-        // Create directory if it doesn't exist
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        // Save the file
-        Path path = Paths.get(uploadDir + file.getOriginalFilename());
-        Files.write(path, file.getBytes());
-        return path.toString(); // Return the file path for storage
     }
 }

@@ -15,8 +15,8 @@ public class DataDTO {
     private String mid;
     private String notes;
     private String result;
-    private String fotoKtpUrl;      // Cloudinary URL for KTP photo
-    private String fotoSelfieUrl;   // Cloudinary URL for selfie photo
+    private String fotoKtpUrl;
+    private String fotoSelfieUrl;
 
     public String getMid() {
         return mid;

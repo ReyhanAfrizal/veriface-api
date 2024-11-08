@@ -1,7 +1,18 @@
 package com.reyhan.veriface.controller;
 
+/*
+IntelliJ IDEA 2024.2.3 (Community Edition)
+Build #IC-242.23339.11, built on September 25, 2024
+@Author Reyhan a.k.a. Reyhan Afrizal
+Java Developer
+Created on 11/5/2024 11:57 AM
+@Last Modified 11/5/2024 11:57 AM
+Version 1.0
+*/
+
 import com.reyhan.veriface.dto.DataDTO;
 import com.reyhan.veriface.model.Data;
+import com.reyhan.veriface.service.CloudinaryService;
 import com.reyhan.veriface.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +34,9 @@ public class DataController {
     @Autowired
     private DataService dataService;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     // Create a new data entry with file uploads
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<Data> createData(
@@ -33,48 +47,53 @@ public class DataController {
             @RequestPart("fotoSelfie") MultipartFile fotoSelfie) {
 
         try {
+            // Upload images to Cloudinary
+            String fotoKtpUrl = cloudinaryService.uploadFile(fotoKtp);
+            String fotoSelfieUrl = cloudinaryService.uploadFile(fotoSelfie);
+
+            // Set URLs in DataDTO
             DataDTO dataDTO = new DataDTO();
             dataDTO.setMid(mid);
             dataDTO.setNotes(notes);
             dataDTO.setResult(result);
+            dataDTO.setFotoKtpUrl(fotoKtpUrl);
+            dataDTO.setFotoSelfieUrl(fotoSelfieUrl);
 
-            // Create the Data entry
+            // Save Data entry
             Data createdData = dataService.createData(dataDTO, fotoKtp, fotoSelfie);
 
-            // Start a new thread to trigger Python server endpoint asynchronously
-            new Thread(() -> {
-                try {
-                    URL url = new URL("http://localhost:5000/run_verification");
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("POST");
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    connection.setDoOutput(true);
-
-                    // Example JSON payload to send to Python server
-                    String jsonPayload = String.format(
-                            "{\"mid\": \"%s\", \"result\": \"%s\"}", mid, result
-                    );
-
-                    try (OutputStream os = connection.getOutputStream()) {
-                        byte[] input = jsonPayload.getBytes("utf-8");
-                        os.write(input, 0, input.length);
-                    }
-
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        System.out.println("Verification process started successfully.");
-                    } else {
-                        System.out.println("Failed to start verification process, response code: " + responseCode);
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            // Start asynchronous verification (Python server call)
+            new Thread(() -> startVerification(mid, result)).start();
 
             return new ResponseEntity<>(createdData, HttpStatus.CREATED);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    private void startVerification(String mid, String result) {
+        try {
+            URL url = new URL("http://localhost:5000/run_verification");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            String jsonPayload = String.format("{\"mid\": \"%s\", \"result\": \"%s\"}", mid, result);
+
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonPayload.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                System.out.println("Verification process started successfully.");
+            } else {
+                System.out.println("Failed to start verification process, response code: " + responseCode);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -106,6 +125,16 @@ public class DataController {
             dataDTO.setMid(mid);
             dataDTO.setNotes(notes);
             dataDTO.setResult(result);
+
+            // Optional Cloudinary upload if new files are provided
+            if (fotoKtp != null) {
+                String fotoKtpUrl = cloudinaryService.uploadFile(fotoKtp);
+                dataDTO.setFotoKtpUrl(fotoKtpUrl);
+            }
+            if (fotoSelfie != null) {
+                String fotoSelfieUrl = cloudinaryService.uploadFile(fotoSelfie);
+                dataDTO.setFotoSelfieUrl(fotoSelfieUrl);
+            }
 
             Optional<Data> updatedData = dataService.updateData(id, dataDTO, fotoKtp, fotoSelfie);
             return updatedData.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
