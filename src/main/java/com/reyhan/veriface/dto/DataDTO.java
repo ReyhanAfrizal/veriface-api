@@ -1,6 +1,5 @@
 package com.reyhan.veriface.dto;
 
-
 /*
 IntelliJ IDEA 2024.2.3 (Community Edition)
 Build #IC-242.23339.11, built on September 25, 2024
