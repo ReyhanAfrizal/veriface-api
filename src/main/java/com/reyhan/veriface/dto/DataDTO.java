@@ -11,18 +11,18 @@ Version 1.0
 */
 
 public class DataDTO {
-    private String mid;
+    private String namaKonsumen;
     private String notes;
     private String result;
     private String fotoKtpUrl;
     private String fotoSelfieUrl;
 
-    public String getMid() {
-        return mid;
+    public String getNamaKonsumen() {
+        return namaKonsumen;
     }
 
-    public void setMid(String mid) {
-        this.mid = mid;
+    public void setNamaKonsumen(String namaKonsumen) {
+        this.namaKonsumen = namaKonsumen;
     }
 
     public String getNotes() {

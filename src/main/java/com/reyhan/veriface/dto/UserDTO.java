@@ -16,6 +16,7 @@ public class UserDTO {
     private String namaUser;
     private String nip;
     private String password;
+    private String email;
 
     // Getters and Setters
 
@@ -41,6 +42,14 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
 

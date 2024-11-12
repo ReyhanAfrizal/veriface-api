@@ -32,6 +32,9 @@ public class User {
     @Column(length = 64)
     private String password;
 
+    @Column(length = 50)
+    private String email;
+
     private Timestamp createdUserAt;
 
     private Timestamp modifiedUserAt;
@@ -87,6 +90,14 @@ public class User {
 
     public void setCreatedUserAt(Timestamp createdUserAt) {
         this.createdUserAt = createdUserAt;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Timestamp getModifiedUserAt() {

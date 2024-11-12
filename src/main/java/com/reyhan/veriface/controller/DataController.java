@@ -40,7 +40,7 @@ public class DataController {
     // Create a new data entry with file uploads
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<Data> createData(
-            @RequestPart("mid") String mid,
+            @RequestPart("namaKonsumen") String namaKonsumen,
             @RequestPart("notes") String notes,
             @RequestPart("result") String result,
             @RequestPart("fotoKtp") MultipartFile fotoKtp,
@@ -53,7 +53,7 @@ public class DataController {
 
             // Set URLs in DataDTO
             DataDTO dataDTO = new DataDTO();
-            dataDTO.setMid(mid);
+            dataDTO.setNamaKonsumen(namaKonsumen);
             dataDTO.setNotes(notes);
             dataDTO.setResult(result);
             dataDTO.setFotoKtpUrl(fotoKtpUrl);
@@ -63,7 +63,7 @@ public class DataController {
             Data createdData = dataService.createData(dataDTO, fotoKtp, fotoSelfie);
 
             // Start asynchronous verification (Python server call)
-            new Thread(() -> startVerification(mid, result)).start();
+            new Thread(() -> startVerification(namaKonsumen, result)).start();
 
             return new ResponseEntity<>(createdData, HttpStatus.CREATED);
         } catch (IOException e) {
@@ -71,7 +71,7 @@ public class DataController {
         }
     }
 
-    private void startVerification(String mid, String result) {
+    private void startVerification(String namaKonsumen, String result) {
         try {
             URL url = new URL("http://localhost:5000/run_verification");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -79,7 +79,7 @@ public class DataController {
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
 
-            String jsonPayload = String.format("{\"mid\": \"%s\", \"result\": \"%s\"}", mid, result);
+            String jsonPayload = String.format("{\"namaKonsumen\": \"%s\", \"result\": \"%s\"}", namaKonsumen, result);
 
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = jsonPayload.getBytes("utf-8");
@@ -114,7 +114,7 @@ public class DataController {
     @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<Data> updateData(
             @PathVariable Integer id,
-            @RequestPart("mid") String mid,
+            @RequestPart("namaKonsumen") String namaKonsumen,
             @RequestPart("notes") String notes,
             @RequestPart("result") String result,
             @RequestPart(value = "fotoKtp", required = false) MultipartFile fotoKtp,
@@ -122,7 +122,7 @@ public class DataController {
 
         try {
             DataDTO dataDTO = new DataDTO();
-            dataDTO.setMid(mid);
+            dataDTO.setNamaKonsumen(namaKonsumen);
             dataDTO.setNotes(notes);
             dataDTO.setResult(result);
 
@@ -138,6 +138,7 @@ public class DataController {
 
             Optional<Data> updatedData = dataService.updateData(id, dataDTO, fotoKtp, fotoSelfie);
             return updatedData.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

@@ -23,7 +23,7 @@ public class Data {
     private Integer id;
 
     @Column(length = 200)
-    private String mid;
+    private String namaKonsumen;
 
     @Column(length = 200)
     private String fotoKtp;
@@ -76,12 +76,12 @@ public class Data {
         this.id = id;
     }
 
-    public String getMid() {
-        return mid;
+    public String getNamaKonsumen() {
+        return namaKonsumen;
     }
 
-    public void setMid(String mid) {
-        this.mid = mid;
+    public void setNamaKonsumen(String namaKonsumen) {
+        this.namaKonsumen = namaKonsumen;
     }
 
     public String getFotoKtp() {

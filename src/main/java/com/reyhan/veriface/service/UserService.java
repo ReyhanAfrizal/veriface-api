@@ -30,6 +30,7 @@ public class UserService {
         user.setNamaUser(userDTO.getNamaUser());
         user.setNip(userDTO.getNip());
         user.setPassword(userDTO.getPassword());
+        user.setEmail(userDTO.getEmail());
         return userRepository.save(user);
     }
 
@@ -49,6 +50,7 @@ public class UserService {
             user.setNamaUser(userDTO.getNamaUser());
             user.setNip(userDTO.getNip());
             user.setPassword(userDTO.getPassword());
+            user.setEmail(userDTO.getEmail());
             return userRepository.save(user);
         });
     }

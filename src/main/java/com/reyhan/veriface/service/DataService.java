@@ -33,7 +33,7 @@ public class DataService {
     // Create a new data entry with file uploads to Cloudinary
     public Data createData(DataDTO dataDTO, MultipartFile fotoKtp, MultipartFile fotoSelfie) throws IOException {
         Data data = new Data();
-        data.setMid(dataDTO.getMid());
+        data.setNamaKonsumen(dataDTO.getNamaKonsumen());
         data.setNotes(dataDTO.getNotes());
         data.setResult(dataDTO.getResult());
 
@@ -62,7 +62,7 @@ public class DataService {
     // Update a data entry by ID
     public Optional<Data> updateData(Integer id, DataDTO dataDTO, MultipartFile fotoKtp, MultipartFile fotoSelfie) throws IOException {
         return dataRepository.findById(id).map(data -> {
-            data.setMid(dataDTO.getMid());
+            data.setNamaKonsumen(dataDTO.getNamaKonsumen());
             data.setNotes(dataDTO.getNotes());
             data.setResult(dataDTO.getResult());
 
