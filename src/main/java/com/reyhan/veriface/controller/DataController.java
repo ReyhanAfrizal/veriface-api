@@ -137,7 +137,14 @@ public class DataController {
             }
 
             Optional<Data> updatedData = dataService.updateData(id, dataDTO, fotoKtp, fotoSelfie);
-            return updatedData.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+            if (updatedData.isPresent()) {
+                // Start asynchronous verification (Python server call) on successful update
+                new Thread(() -> startVerification(namaKonsumen, result)).start();
+                return ResponseEntity.ok(updatedData.get());
+            } else {
+                return ResponseEntity.notFound().build();
+            }
 
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
