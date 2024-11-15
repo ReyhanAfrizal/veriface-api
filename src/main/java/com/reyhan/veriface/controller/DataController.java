@@ -14,6 +14,7 @@ import com.reyhan.veriface.dto.DataDTO;
 import com.reyhan.veriface.model.Data;
 import com.reyhan.veriface.service.CloudinaryService;
 import com.reyhan.veriface.service.DataService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -156,5 +157,9 @@ public class DataController {
     public ResponseEntity<Void> deleteData(@PathVariable Integer id) {
         boolean isDeleted = dataService.deleteDataById(id);
         return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("ok")
+    public void getOk(@Valid @RequestBody DataDTO dataDTO){
     }
 }

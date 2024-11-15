@@ -17,6 +17,8 @@ public class DataDTO {
     private String fotoKtpUrl;
     private String fotoSelfieUrl;
 
+    //Getter and Setter
+
     public String getNamaKonsumen() {
         return namaKonsumen;
     }
