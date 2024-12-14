@@ -11,6 +11,7 @@ Created on 11/5/2024 11:57 AM
 Version 1.0
 */
 
+import com.reyhan.veriface.dto.LoginDTO;
 import com.reyhan.veriface.dto.UserDTO;
 import com.reyhan.veriface.model.User;
 import com.reyhan.veriface.service.UserService;
@@ -61,5 +62,16 @@ public class UserController {
     public ResponseEntity<Void> deleteUserById(@PathVariable Integer id) {
         boolean deleted = userService.deleteUserById(id);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    // Login endpoint
+    @PostMapping("/login")
+    public User login(@RequestBody LoginDTO loginDTO) {
+        User user = userService.login(loginDTO);
+        if (user != null) {
+            return user; // Return the user if login is successful
+        } else {
+            throw new RuntimeException("Invalid credentials"); // Or handle it as you wish
+        }
     }
 }

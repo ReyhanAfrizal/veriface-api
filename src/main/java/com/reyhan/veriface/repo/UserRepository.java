@@ -13,9 +13,9 @@ Version 1.0
 
 import com.reyhan.veriface.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Integer> {
-    // Custom queries can be added here if needed
+    Optional<User> findByNip(String nip); // Find user by NIP
 }
